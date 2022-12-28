@@ -3,14 +3,18 @@ import wget
 import pandas as pd
 from datetime import datetime, timezone
 
-urlTimeDifference = input("Enter Time Difference in Minutes: ")
+urlTimeDifference = None
 
-if (int(urlTimeDifference) < 5):
-    print('Enter Time Difference Greater Than 5 Minutes')
-    exit()
-else:
-    # Time Difference for Fresh URLs
-    urlTimeDifference = int(urlTimeDifference)
+decision = input("Do you want to have Time Difference (Y/N): ")
+if ((decision.upper() == 'Y') or (decision == '')):
+    urlTimeDifference = input("\nEnter Time Difference in Minutes: ")
+
+    if (int(urlTimeDifference) < 5):
+        print('\nVALUE ERROR: Enter Time Difference Greater Than 5 Minutes!')
+        exit()
+    else:
+        # Time Difference for Fresh URLs
+        urlTimeDifference = int(urlTimeDifference)
 
 countFile = open('./operationFiles/count.txt', 'r')
 count = countFile.readline(1)
@@ -57,18 +61,21 @@ def recentURLCheck(urllist, currentDateTime):
     return validUrl
 
 
-# urlList = pd.json_normalize(urlJson["urls"])
 urlList = pd.read_csv(filename, skiprows=8)
-print(urlList)
+# print(urlList)
 urlList = urlList[["url", "dateadded"]]
-urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
 
-current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
-current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
+if (urlTimeDifference):
+    urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
+    current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
+    current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
+    freshUrlList = recentURLCheck(urlList, current_datetime)
+else:
+    freshUrlList = urlList[["url"]]
 
-freshUrlList = recentURLCheck(urlList, current_datetime)
 freshUrlList = pd.DataFrame(freshUrlList, columns=["url"])
-freshUrlList.to_csv("./operationFiles/urlList.csv", index=False, header=False)
+freshUrlList.to_csv("./operationFiles/urlList.csv",
+                    index=False, header=False)
 
 count = int(count)
 os.system(f"./httpx-operation.sh {count}")
