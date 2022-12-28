@@ -3,13 +3,47 @@ import wget
 import pandas as pd
 from datetime import datetime, timezone
 
-urlTimeDifference = 30  # Time Difference for Fresh URLs
+urlTimeDifference = input("Enter Time Difference in Minutes: ")
+
+if (int(urlTimeDifference) < 5):
+    print('Enter Time Difference Greater Than 5 Minutes')
+    exit()
+else:
+    # Time Difference for Fresh URLs
+    urlTimeDifference = int(urlTimeDifference)
+
+countFile = open('./operationFiles/count.txt', 'r')
+count = countFile.readline(1)
+countFile.close()
+urlName = None
+
+while (True):
+    os.system('clear')  # Clear Teminal on Linux System
+    print("========================")
+    print("\tURL GATHERER")
+    print("========================")
+    print("\nURL TYPE:")
+    print("\n1. Online URLs\n2. Recent URLs")
+    urlType = input("Input URL TYPE: ")
+
+    if ((urlType == '1') or (urlType == '2')):
+        if (urlType == '1'):
+            urlName = 'Online'
+            filename = f"./csvDownloads/{count}-{urlName}-urls.csv"
+            wget.download(
+                'https://urlhaus.abuse.ch/downloads/csv_online/', filename)
+        elif (urlType == '2'):
+            urlName = 'Recent'
+            filename = f"./csvDownloads/{count}-{urlName}-urls.csv"
+            wget.download(
+                'https://urlhaus.abuse.ch/downloads/csv_recent/', filename)
+        break
 
 
 def recentURLCheck(urllist, currentDateTime):
     validUrl = []
 
-    for url in zip(urllist["url"], urllist["date_added"]):
+    for url in zip(urllist["url"], urllist["dateadded"]):
         testValue = url[1]
 
         testValue = datetime.strptime(testValue, "%Y-%m-%d %X")
@@ -23,20 +57,11 @@ def recentURLCheck(urllist, currentDateTime):
     return validUrl
 
 
-countFile = open('./operationFiles/count.txt', 'r')
-count = countFile.readline(1)
-countFile.close()
-
-filename = './jsonDownloads/'+count+'_urls.json'
-
-wget.download(
-    'https://urlhaus-api.abuse.ch/v1/urls/recent/', filename)
-
-urlJson = pd.read_json(filename)
-urlList = pd.json_normalize(urlJson["urls"])
-
-urlList = urlList[["url", "date_added"]]
-urlList["date_added"] = urlList["date_added"].str.replace(" UTC", "")
+# urlList = pd.json_normalize(urlJson["urls"])
+urlList = pd.read_csv(filename, skiprows=8)
+print(urlList)
+urlList = urlList[["url", "dateadded"]]
+urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
 
 current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
 current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
