@@ -4,22 +4,16 @@ import pandas as pd
 from datetime import datetime, timezone
 
 urlTimeDifference = None
+current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
+current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
 
-decision = input("Do you want to have Time Difference (Y/N): ")
-if ((decision.upper() == 'Y') or (decision == '')):
-    urlTimeDifference = input("\nEnter Time Difference in Minutes: ")
-
-    if (int(urlTimeDifference) < 5):
-        print('\nVALUE ERROR: Enter Time Difference Greater Than 5 Minutes!')
-        exit()
-    else:
-        # Time Difference for Fresh URLs
-        urlTimeDifference = int(urlTimeDifference)
+urlTimeDifference = 60
 
 countFile = open('./operationFiles/count.txt', 'r')
 count = countFile.readline(1)
 countFile.close()
 urlName = None
+filename = None
 
 while (True):
     os.system('clear')  # Clear Teminal on Linux System
@@ -33,12 +27,12 @@ while (True):
     if ((urlType == '1') or (urlType == '2')):
         if (urlType == '1'):
             urlName = 'Online'
-            filename = f"./csvDownloads/{count}-{urlName}-urls.csv"
+            filename = f"./csvDownloads/{count}-{urlName}-{current_datetime}-UTC-urls.csv"
             wget.download(
                 'https://urlhaus.abuse.ch/downloads/csv_online/', filename)
         elif (urlType == '2'):
             urlName = 'Recent'
-            filename = f"./csvDownloads/{count}-{urlName}-urls.csv"
+            filename = f"./csvDownloads/{count}-{urlName}-{current_datetime}-UTC-urls.csv"
             wget.download(
                 'https://urlhaus.abuse.ch/downloads/csv_recent/', filename)
         break
@@ -67,8 +61,6 @@ urlList = urlList[["url", "dateadded"]]
 
 if (urlTimeDifference):
     urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
-    current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
-    current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
     freshUrlList = recentURLCheck(urlList, current_datetime)
 else:
     freshUrlList = urlList[["url"]]
