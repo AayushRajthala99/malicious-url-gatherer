@@ -3,7 +3,10 @@ import wget
 import pandas as pd
 from datetime import datetime, timezone
 
-urlTimeDifference = None
+# urlCount = input("Input number of URLs to be Fetched: ")
+# urlCount = int(urlCount)
+
+# urlTimeDifference = None
 current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
 current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
 
@@ -15,27 +18,27 @@ countFile.close()
 urlName = None
 filename = None
 
-while (True):
-    os.system('clear')  # Clear Teminal on Linux System
-    print("========================")
-    print("\tURL GATHERER")
-    print("========================")
-    print("\nURL TYPE:")
-    print("\n1. Online URLs\n2. Recent URLs")
-    urlType = input("Input URL TYPE: ")
+# while (True):
+# os.system('clear')  # Clear Teminal on Linux System
+# print("========================")
+# print("\tURL GATHERER")
+# print("========================")
+# print("\nURL TYPE:")
+# print("\n1. Online URLs\n2. Recent URLs")
+# urlType = input("Input URL TYPE: ")
 
-    if ((urlType == '1') or (urlType == '2')):
-        if (urlType == '1'):
-            urlName = 'Online'
-            filename = f"./csvDownloads/{count}-{urlName}-{current_datetime}-UTC-urls.csv"
-            wget.download(
-                'https://urlhaus.abuse.ch/downloads/csv_online/', filename)
-        elif (urlType == '2'):
-            urlName = 'Recent'
-            filename = f"./csvDownloads/{count}-{urlName}-{current_datetime}-UTC-urls.csv"
-            wget.download(
-                'https://urlhaus.abuse.ch/downloads/csv_recent/', filename)
-        break
+# if ((urlType == '1') or (urlType == '2')):
+#     if (urlType == '1'):
+#         urlName = 'Online'
+#         filename = f"./csvDownloads/{count}-{urlName}-{current_datetime}-UTC-urls.csv"
+#         wget.download(
+#             'https://urlhaus.abuse.ch/downloads/csv_online/', filename)
+#     elif (urlType == '2'):
+#         urlName = 'Recent'
+#         filename = f"./csvDownloads/{count}-{urlName}-{current_datetime}-UTC-urls.csv"
+#         wget.download(
+#             'https://urlhaus.abuse.ch/downloads/csv_recent/', filename)
+#     break
 
 
 def recentURLCheck(urllist, currentDateTime):
@@ -55,13 +58,25 @@ def recentURLCheck(urllist, currentDateTime):
     return validUrl
 
 
-urlList = pd.read_csv(filename, skiprows=8)
-# print(urlList)
-urlList = urlList[["url", "dateadded"]]
+onlinefilename = f"./csvDownloads/{count}-Online-{current_datetime}-UTC-urls.csv"
+recentfilename = f"./csvDownloads/{count}-Recent-{current_datetime}-UTC-urls.csv"
+
+wget.download('https://urlhaus.abuse.ch/downloads/csv_online/', onlinefilename)
+wget.download('https://urlhaus.abuse.ch/downloads/csv_recent/', recentfilename)
+
+onlineurlList = pd.read_csv(onlinefilename, skiprows=8)
+recenturlList = pd.read_csv(recentfilename, skiprows=8)
+
+onlineurlList = onlineurlList[["url", "dateadded"]]
+recenturlList = recenturlList[["url", "dateadded"]]
+
+urlList = pd.merge(onlineurlList, recenturlList)
+urlList = urlList.sort_values(by="dateadded", ascending=False)
 
 if (urlTimeDifference):
     urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
     freshUrlList = recentURLCheck(urlList, current_datetime)
+    # freshUrlList = freshUrlList[:urlCount]
 else:
     freshUrlList = urlList[["url"]]
 
