@@ -7,8 +7,10 @@ from datetime import datetime, timezone
 # urlCount = int(urlCount)
 
 # urlTimeDifference = None
-current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %X")
+datetimeValue = datetime.now(timezone.utc)
+current_datetime = datetimeValue.strftime("%Y-%m-%d %X")
 current_datetime = datetime.strptime(current_datetime, "%Y-%m-%d %X")
+result_datetime = datetimeValue.strftime("%Y-%m-%d-%HH-%Mm-%Ss")
 
 urlTimeDifference = 60
 
@@ -58,8 +60,8 @@ def recentURLCheck(urllist, currentDateTime):
     return validUrl
 
 
-onlinefilename = f"./csvDownloads/{count}-Online-{current_datetime}-UTC-urls.csv"
-recentfilename = f"./csvDownloads/{count}-Recent-{current_datetime}-UTC-urls.csv"
+onlinefilename = rf"csvDownloads\{count}-Online-{result_datetime}-UTC-urls.csv"
+recentfilename = rf"csvDownloads\{count}-Recent-{result_datetime}-UTC-urls.csv"
 
 wget.download('https://urlhaus.abuse.ch/downloads/csv_online/', onlinefilename)
 wget.download('https://urlhaus.abuse.ch/downloads/csv_recent/', recentfilename)
@@ -81,11 +83,18 @@ else:
     freshUrlList = urlList[["url"]]
 
 freshUrlList = pd.DataFrame(freshUrlList, columns=["url"])
-freshUrlList.to_csv("./operationFiles/urlList.csv",
+
+# Commented Code for HTTPX-Operation... [Uncomment this if HTTPX-Operation is needed]
+# freshUrlList.to_csv("./operationFiles/urlList.csv",
+# index=False, header=False)
+
+resultCSVPath = rf"results\{count}-Results-{result_datetime}.csv"
+freshUrlList.to_csv(resultCSVPath,
                     index=False, header=False)
 
 count = int(count)
-os.system(f"./httpx-operation.sh {count}")
+# Commented Code for HTTPX-Operation... [Uncomment this if HTTPX-Operation is needed]
+# os.system(f"./httpx-operation.sh {count}")
 count = count+1
 count = str(count)
 
