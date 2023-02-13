@@ -60,29 +60,31 @@ def recentURLCheck(urllist, currentDateTime):
     return validUrl
 
 
-onlinefilename = rf"csvDownloads\{count}-Online-{result_datetime}-UTC-urls.csv"
+# onlinefilename = rf"csvDownloads\{count}-Online-{result_datetime}-UTC-urls.csv"
 recentfilename = rf"csvDownloads\{count}-Recent-{result_datetime}-UTC-urls.csv"
 
-wget.download('https://urlhaus.abuse.ch/downloads/csv_online/', onlinefilename)
+# wget.download('https://urlhaus.abuse.ch/downloads/csv_online/', onlinefilename)
 wget.download('https://urlhaus.abuse.ch/downloads/csv_recent/', recentfilename)
 
-onlineurlList = pd.read_csv(onlinefilename, skiprows=8)
+# onlineurlList = pd.read_csv(onlinefilename, skiprows=8)
 recenturlList = pd.read_csv(recentfilename, skiprows=8)
 
-onlineurlList = onlineurlList[["url", "dateadded"]]
-recenturlList = recenturlList[["url", "dateadded"]]
+# onlineurlList = onlineurlList[["url", "dateadded"]]
+# recenturlList = recenturlList[["url", "dateadded"]]
 
-urlList = pd.merge(onlineurlList, recenturlList)
-urlList = urlList.sort_values(by="dateadded", ascending=False)
+# urlList = pd.merge(onlineurlList, recenturlList)
+# urlList = urlList.sort_values(by="dateadded", ascending=False)
 
-if (urlTimeDifference):
-    urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
-    freshUrlList = recentURLCheck(urlList, current_datetime)
-    # freshUrlList = freshUrlList[:urlCount]
-else:
-    freshUrlList = urlList[["url"]]
+# if (urlTimeDifference):
+#     urlList["dateadded"] = urlList["dateadded"].str.replace(" UTC", "")
+#     freshUrlList = recentURLCheck(urlList, current_datetime)
+#     freshUrlList = freshUrlList[:urlCount]
+# else:
+#     freshUrlList = urlList[["url"]]
 
-freshUrlList = pd.DataFrame(freshUrlList, columns=["url"])
+# freshUrlList = pd.DataFrame(freshUrlList, columns=["url"])
+freshUrlList = recenturlList.head(100)
+freshUrlList = freshUrlList[["url"]]
 
 # Commented Code for HTTPX-Operation... [Uncomment this if HTTPX-Operation is needed]
 # freshUrlList.to_csv("./operationFiles/urlList.csv",
